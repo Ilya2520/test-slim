@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h1>User List</h1>
+<div class="d-flex flex-wrap" style="margin: 0 -5px;margin-left: 15px;width: 100%">
+    {% for i in items %}
+    <div class="border border-primary d-block mt-10" style="width: 25%;margin: 0 25px;">
+        <img src="templates/404.png" class="card-img-top" style="width: 50%" alt="...">
+        <div class="card-body">
+            <h5 class="card-title">{{ i.name }}</h5>
+            <p class="card-text">{{ i.email }}</p>
+            <a href="http://localhost:8888/users/{{i.id}}" class="btn btn-primary" >О пользователе</a>
+        </div>
+    </div>
+
+    {% endfor %}
+</div>
+{% endblock %}
