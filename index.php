@@ -42,6 +42,7 @@ $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 // Define app routes
 $app->get('/api/users', function (Request $request, Response $response, $args) {
     $n = checkLimit($request->getQueryParams());
+    setcookie("users_cnt", (string)$n);
     $user_contr = new UserController($n);
     $users = $user_contr->getUser();
     $view = Twig::fromRequest($request);
@@ -54,6 +55,7 @@ $app->get('/api/users', function (Request $request, Response $response, $args) {
 
 $app->get('/users', function (Request $request, Response $response, $args) {
     $n = checkLimit($request->getQueryParams());
+    setcookie("users_cnt", $n);
     $user_contr = new UserController($n);
     $users = $user_contr->getUser();
     $view = Twig::fromRequest($request);
@@ -65,10 +67,16 @@ $app->get('/users', function (Request $request, Response $response, $args) {
 })->setName('users');
 
 
+$app->get('/add_user_token', function (Request $request, Response  $response){
+    setcookie('access', "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdHQiOiJhY2Nlc3MiLCJleHAiOjE3MDM1MTA3MjQsImlhdCI6MTcwMzUwNzEyNC", 86400);
+    return $response->withStatus(200)->withHeader('Location', 'users');
+});
+
 $app->get('/api/users/{userId}', function (Request $request, Response $response, $args) {
     $ids = $args['userId'];
     $user_contr = new UserController();
-    $users = $user_contr->getConcreteUser($ids);
+    $lim = $request->getCookieParams()['users_cnt'];
+    $users = $user_contr->getConcreteUser($ids, $lim);
     $view = Twig::fromRequest($request);
     if ($users) {
         $response->getBody()->write(json_encode($users));
@@ -88,7 +96,8 @@ $app->get('/api/users/{userId}', function (Request $request, Response $response,
 $app->get('/users/{userId}', function (Request $request, Response $response, $args) {
     $ids = $args['userId'];
     $user_contr = new UserController();
-    $users = $user_contr->getConcreteUser($ids);
+    $lim = $request->getCookieParams()['users_cnt'];
+    $users = $user_contr->getConcreteUser($ids, $lim) ;
     $view = Twig::fromRequest($request);
     if ($users) {
         return $view->render($response
@@ -109,7 +118,7 @@ $app->delete('/api/users/delete/{userId}', function (Request $request, Response 
     $response->getBody()->write(json_encode($res));
     return $response
         ->withHeader('content-type', 'application/json')
-        ->withStatus(200);
+        ->withStatus(204);
 })->setName('delete users');
 
 $app->get('/welcome', function (Request $request, Response $response) {

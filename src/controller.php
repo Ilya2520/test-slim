@@ -4,15 +4,16 @@ class UserController
 {
     public $users;
 
-    public function __construct(int $n=5)
+    public function __construct(int $n=10)
     {
         $faker = Faker\Factory::create();
 
         for ($i = 0; $i < $n; $i++) {
             $name = $faker->name;
             $mail = substr(str_replace(" ", "", $name), 0, 12) . "@mail.ru";
-            $url = $faker->imageUrl();
+            $url = $faker->imageUrl;
             $this->users[] = new User($i, $name, $mail, $url);
+
         }
     }
 
@@ -21,9 +22,9 @@ class UserController
         return $this->users;
     }
 
-    public function getConcreteUser(int $id): array
+    public function getConcreteUser(int $id, int $lim): array
     {
-        if ($id>count($this->users)-1 or $id<0)
+        if ($id>$lim-1 or $id<0)
             return [];
         return array($this->users[$id]);
     }
@@ -82,7 +83,7 @@ class UserController
     }
 }
 
-function checkLimit($n)
+function checkLimit($n): int
 {
     if (!array_key_exists('limit', $n)) {
         return 5;
